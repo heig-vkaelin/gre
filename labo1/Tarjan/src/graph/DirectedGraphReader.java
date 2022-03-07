@@ -61,5 +61,4 @@ public final class DirectedGraphReader {
   public static DirectedGraph fromFile(final String filename) throws IOException {
     return fromInputStreamReader(new FileReader(filename));
   }
-
 }
