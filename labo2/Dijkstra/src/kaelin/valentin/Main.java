@@ -8,6 +8,7 @@ import graph.core.impl.SimpleWeightedEdgeFactory;
 import graph.reader.CartesianGraphReader;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class Main {
     /*
@@ -31,5 +32,13 @@ public class Main {
                 new SimpleWeightedEdgeFactory<>(new SimpleEdgeWeighter()),
                 DATA_FOLDER + "R15_1.txt"
         ).graph();
+        
+        Dijkstra dijkstra = new Dijkstra(graph);
+        dijkstra.run(1);
+        
+        System.out.println("Distances: ");
+        System.out.println(Arrays.toString(dijkstra.getDistances()));
+        System.out.println("Prédécesseurs");
+        System.out.println(Arrays.toString(dijkstra.getPredecessors()));
     }
 }
