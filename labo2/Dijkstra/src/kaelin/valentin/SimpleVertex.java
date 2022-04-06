@@ -24,4 +24,9 @@ public class SimpleVertex implements Vertex {
     public int getY() {
         return data.y;
     }
+    
+    @Override
+    public String toString() {
+        return String.valueOf(id);
+    }
 }

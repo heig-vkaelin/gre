@@ -34,7 +34,7 @@ public class Main {
         ).graph();
         
         Dijkstra dijkstra = new Dijkstra(graph);
-        dijkstra.run(1);
+        dijkstra.run(0);
         
         System.out.println("Distances: ");
         System.out.println(Arrays.toString(dijkstra.getDistances()));
