@@ -33,13 +33,26 @@ public class Main {
                 DATA_FOLDER + "R15_1.txt"
         ).graph();
         
-        Dijkstra dijkstra = new Dijkstra(graph);
-        dijkstra.run(graph.getVertices().get(0));
+        Dijkstra forward = new Dijkstra(graph);
+        forward.runForward(graph.getVertices().get(0));
         
+        System.out.println("\nFORWARD:");
         System.out.println("Distances: ");
-        System.out.println(Arrays.toString(dijkstra.getDistances()));
+        System.out.println(Arrays.toString(forward.getDistances()));
         System.out.println("Prédécesseurs");
-        System.out.println(Arrays.toString(dijkstra.getPredecessors()));
+        System.out.println(Arrays.toString(forward.getPredecessors()));
+        
+        
+        Dijkstra bidirectional = new Dijkstra(graph);
+        bidirectional.runBidirectional(
+                graph.getVertices().get(0),
+                graph.getVertices().get(graph.getVertices().size() - 1)
+        );
+        System.out.println("\nBIDIRECTIONAL:");
+        System.out.println("Distances: ");
+        System.out.println(Arrays.toString(bidirectional.getDistances()));
+        System.out.println("Prédécesseurs");
+        System.out.println(Arrays.toString(bidirectional.getPredecessors()));
 
 //        DigraphDijkstrazer dd = new DigraphDijkstrazer(graph);
 //        dd.solve(graph.getVertices().get(0));
