@@ -1,15 +1,17 @@
 package kaelin.valentin;
 
 import graph.core.Vertex;
-import graph.data.CartesianVertexData;
 
 public class SimpleVertex implements Vertex {
-    private final CartesianVertexData data;
     private final int id;
     
-    public SimpleVertex(int id, CartesianVertexData data) {
+    private final int x;
+    private final int y;
+    
+    public SimpleVertex(int id, int x, int y) {
         this.id = id;
-        this.data = data;
+        this.x = x;
+        this.y = y;
     }
     
     @Override
@@ -18,11 +20,11 @@ public class SimpleVertex implements Vertex {
     }
     
     public int getX() {
-        return data.x;
+        return x;
     }
     
     public int getY() {
-        return data.y;
+        return y;
     }
     
     @Override

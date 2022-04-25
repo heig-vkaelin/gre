@@ -13,34 +13,34 @@ public class Dijkstra {
     private final Digraph<SimpleVertex, SimpleWeightedEdge<SimpleVertex>> graph;
     private PriorityQueue<SimpleVertex> verticesToVisit;
     
-    private long[] distances;
-    private SimpleVertex[] predecessors;
+    private Long[] distances;
+    private Integer[] predecessors;
     
     public Dijkstra(Digraph<SimpleVertex, SimpleWeightedEdge<SimpleVertex>> graph) {
         this.graph = graph;
     }
     
-    public void run(int startVertex) {
-        int nbVertices = graph.getNVertices();
-        if (startVertex > nbVertices || startVertex < 0)
+    public void run(SimpleVertex startVertex) {
+        if (startVertex == null)
             throw new RuntimeException("Sommet de départ invalide!");
         
-        distances = new long[nbVertices];
+        int nbVertices = graph.getNVertices();
+        distances = new Long[nbVertices];
         Arrays.fill(distances, Long.MAX_VALUE);
-        predecessors = new SimpleVertex[nbVertices];
+        predecessors = new Integer[nbVertices];
         Arrays.fill(predecessors, null);
         verticesToVisit = new PriorityQueue<>(
                 graph.getNVertices(),
                 Comparator.comparingLong(v -> distances[v.id()])
         );
         verticesToVisit.addAll(graph.getVertices());
-        distances[startVertex] = 0;
+        distances[startVertex.id()] = 0L;
         
         while (!verticesToVisit.isEmpty()) {
             SimpleVertex nextVertex = verticesToVisit.remove();
             
             if (distances[nextVertex.id()] == Long.MAX_VALUE)
-                continue;
+                break;
             
             var successors = graph.getSuccessorList(nextVertex.id());
             for (SimpleWeightedEdge<SimpleVertex> list : successors) {
@@ -51,17 +51,17 @@ public class Dijkstra {
                     // Mise à jour de la liste de priorité
                     verticesToVisit.remove(succ);
                     verticesToVisit.add(succ);
-                    predecessors[succ.id()] = nextVertex;
+                    predecessors[succ.id()] = nextVertex.id();
                 }
             }
         }
     }
     
-    public long[] getDistances() {
+    public Long[] getDistances() {
         return distances;
     }
     
-    public SimpleVertex[] getPredecessors() {
+    public Integer[] getPredecessors() {
         return predecessors;
     }
 }

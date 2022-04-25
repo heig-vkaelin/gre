@@ -34,11 +34,18 @@ public class Main {
         ).graph();
         
         Dijkstra dijkstra = new Dijkstra(graph);
-        dijkstra.run(0);
+        dijkstra.run(graph.getVertices().get(0));
         
         System.out.println("Distances: ");
         System.out.println(Arrays.toString(dijkstra.getDistances()));
         System.out.println("Prédécesseurs");
         System.out.println(Arrays.toString(dijkstra.getPredecessors()));
+
+//        DigraphDijkstrazer dd = new DigraphDijkstrazer(graph);
+//        dd.solve(graph.getVertices().get(0));
+//        System.out.println("Distances: ");
+//        System.out.println(Arrays.toString(dd.getLambdas()));
+//        System.out.println("Prédécesseurs");
+//        System.out.println(Arrays.toString(dd.getPreds()));
     }
 }
