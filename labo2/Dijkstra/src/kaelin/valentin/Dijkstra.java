@@ -21,7 +21,7 @@ public class Dijkstra {
     }
     
     public void run(int startVertex) {
-        int nbVertices = this.graph.getNVertices();
+        int nbVertices = graph.getNVertices();
         if (startVertex > nbVertices || startVertex < 0)
             throw new RuntimeException("Sommet de départ invalide!");
         
@@ -30,10 +30,10 @@ public class Dijkstra {
         predecessors = new SimpleVertex[nbVertices];
         Arrays.fill(predecessors, null);
         verticesToVisit = new PriorityQueue<>(
-                this.graph.getNVertices(),
+                graph.getNVertices(),
                 Comparator.comparingLong(v -> distances[v.id()])
         );
-        verticesToVisit.addAll(this.graph.getVertices());
+        verticesToVisit.addAll(graph.getVertices());
         distances[startVertex] = 0;
         
         while (!verticesToVisit.isEmpty()) {
@@ -42,14 +42,16 @@ public class Dijkstra {
             if (distances[nextVertex.id()] == Long.MAX_VALUE)
                 continue;
             
-            var successors = this.graph.getSuccessorList(nextVertex.id());
-            
-            for (SimpleWeightedEdge<SimpleVertex> succ : successors) {
-                SimpleVertex j = succ.to();
-                if (verticesToVisit.contains(j) &&
-                        (distances[j.id()] > distances[nextVertex.id()] + succ.weight())) {
-                    distances[j.id()] = distances[nextVertex.id()] + succ.weight();
-                    predecessors[j.id()] = nextVertex;
+            var successors = graph.getSuccessorList(nextVertex.id());
+            for (SimpleWeightedEdge<SimpleVertex> list : successors) {
+                SimpleVertex succ = list.to();
+                if (verticesToVisit.contains(succ) &&
+                        (distances[succ.id()] > distances[nextVertex.id()] + list.weight())) {
+                    distances[succ.id()] = distances[nextVertex.id()] + list.weight();
+                    // Mise à jour de la liste de priorité
+                    verticesToVisit.remove(succ);
+                    verticesToVisit.add(succ);
+                    predecessors[succ.id()] = nextVertex;
                 }
             }
         }
