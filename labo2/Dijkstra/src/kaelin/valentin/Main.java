@@ -44,15 +44,16 @@ public class Main {
         
         
         Dijkstra bidirectional = new Dijkstra(graph);
-        bidirectional.runBidirectional(
+        Long dist = bidirectional.runBidirectional(
                 graph.getVertices().get(0),
                 graph.getVertices().get(graph.getVertices().size() - 1)
         );
         System.out.println("\nBIDIRECTIONAL:");
         System.out.println("Distances: ");
-        System.out.println(Arrays.toString(bidirectional.getDistances()));
+        System.out.println(Arrays.toString(bidirectional.getEntireDistances()));
         System.out.println("Prédécesseurs");
         System.out.println(Arrays.toString(bidirectional.getPredecessors()));
+        System.out.println("Distance de S à T: " + dist);
 
 //        DigraphDijkstrazer dd = new DigraphDijkstrazer(graph);
 //        dd.solve(graph.getVertices().get(0));
