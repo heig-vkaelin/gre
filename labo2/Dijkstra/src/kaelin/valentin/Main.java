@@ -29,13 +29,13 @@ public class Main {
         SimpleVertex to = graph.getVertices().get(12);
         Dijkstra.AlgorithmData data = forward.runForward(from, to);
         
-        System.out.println("\nFORWARD:");
+        System.out.println("FORWARD:");
         System.out.println("Distances: ");
         System.out.println(Arrays.toString(data.distances));
         System.out.println("Prédécesseurs");
         System.out.println(Arrays.toString(data.predecessors));
         
-        System.out.println("Chemin le plus court: ");
+        System.out.print("Chemin le plus court: ");
         forward.printPath(data, from, to);
         
         

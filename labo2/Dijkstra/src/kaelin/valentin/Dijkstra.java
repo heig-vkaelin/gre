@@ -64,11 +64,11 @@ public class Dijkstra {
     
     private void findMin(AlgorithmData data, SimpleVertex nextVertex) {
         var successors = graph.getSuccessorList(nextVertex.id());
-        for (SimpleWeightedEdge<SimpleVertex> list : successors) {
-            SimpleVertex succ = list.to();
+        for (SimpleWeightedEdge<SimpleVertex> edge : successors) {
+            SimpleVertex succ = edge.to();
             if (data.queueContained[succ.id()] &&
-                    (data.distances[succ.id()] > data.distances[nextVertex.id()] + list.weight())) {
-                data.distances[succ.id()] = data.distances[nextVertex.id()] + list.weight();
+                    (data.distances[succ.id()] > data.distances[nextVertex.id()] + edge.weight())) {
+                data.distances[succ.id()] = data.distances[nextVertex.id()] + edge.weight();
                 data.predecessors[succ.id()] = nextVertex.id();
                 
                 // Mise à jour de la liste de priorité
@@ -152,14 +152,15 @@ public class Dijkstra {
         int fromId = from.id();
         int toId = to.id();
         LinkedList<Integer> path = new LinkedList<>();
-        path.add(fromId);
         
         while (fromId != toId) {
-            path.addLast(toId);
+            path.add(0, toId);
             toId = data.predecessors[toId];
         }
+        path.add(0, fromId);
         
         System.out.println(path);
+        System.out.println("Total distance: " + data.distances[to.id()]);
     }
 //
 //    public Long[] getDistances() {
