@@ -25,9 +25,11 @@ public class Dijkstra {
         this.graph = graph;
     }
     
-    public void runForward(SimpleVertex startVertex) {
+    public void runForward(SimpleVertex startVertex, SimpleVertex endVertex) {
         if (startVertex == null)
             throw new RuntimeException("Sommet de départ invalide!");
+        if (endVertex == null)
+            throw new RuntimeException("Sommet d'arrivée invalide!");
         
         int nbVertices = graph.getNVertices();
         distances = new Long[nbVertices];
@@ -44,7 +46,7 @@ public class Dijkstra {
         while (!verticesToVisit.isEmpty()) {
             SimpleVertex nextVertex = verticesToVisit.remove();
             
-            if (distances[nextVertex.id()] == Long.MAX_VALUE)
+            if (nextVertex.id() == endVertex.id() || distances[nextVertex.id()] == Long.MAX_VALUE)
                 break;
             
             var successors = graph.getSuccessorList(nextVertex.id());
@@ -128,7 +130,7 @@ public class Dijkstra {
             // Backward
             nextVertex = backwardQueue.remove();
             backwardContained[nextVertex.id()] = false;
-    
+            
             if (forwardContained[nextVertex.id()])
                 break;
             
@@ -143,7 +145,7 @@ public class Dijkstra {
                     // Mise à jour de la liste de priorité
                     backwardQueue.add(nextVertex);
                     backwardQueue.remove(nextVertex);
-    
+                    
                     mu = Math.min(mu, distancesBack[succ.id()]);
                 }
             }

@@ -18,15 +18,6 @@ public class Main {
     private static final String DATA_FOLDER = "data/";
     
     public static void main(String[] args) throws IOException {
-        /* TODO: Fournir une fabrique de sommets (il s'agit d'une interface
-            fonctionnelle) */
-        
-        /* TODO: Fournir une fonction de pondération renvoyant la distance
-            euclidienne (arrondie à l'entier le plus proche) entre l'extrémité
-            initiale et l'extrémité finale de l'arête */
-        
-        /* TODO: Chemin des fichiers */
-        
         var graph = new CartesianGraphReader<>(
                 new SimpleVertexFactory(),
                 new SimpleWeightedEdgeFactory<>(new SimpleEdgeWeighter()),
@@ -34,7 +25,10 @@ public class Main {
         ).graph();
         
         Dijkstra forward = new Dijkstra(graph);
-        forward.runForward(graph.getVertices().get(0));
+        forward.runForward(
+                graph.getVertices().get(0),
+                graph.getVertices().get(graph.getVertices().size() - 1)
+        );
         
         System.out.println("\nFORWARD:");
         System.out.println("Distances: ");
