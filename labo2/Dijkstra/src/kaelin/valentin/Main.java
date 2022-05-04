@@ -25,10 +25,9 @@ public class Main {
         ).graph();
         
         Dijkstra forward = new Dijkstra(graph);
-        Dijkstra.AlgorithmData data = forward.runForward(
-                graph.getVertices().get(0),
-                graph.getVertices().get(graph.getVertices().size() - 1)
-        );
+        SimpleVertex from = graph.getVertices().get(0);
+        SimpleVertex to = graph.getVertices().get(12);
+        Dijkstra.AlgorithmData data = forward.runForward(from, to);
         
         System.out.println("\nFORWARD:");
         System.out.println("Distances: ");
@@ -36,11 +35,14 @@ public class Main {
         System.out.println("Prédécesseurs");
         System.out.println(Arrays.toString(data.predecessors));
         
+        System.out.println("Chemin le plus court: ");
+        forward.printPath(data, from, to);
+        
         
         Dijkstra bidirectional = new Dijkstra(graph);
         Long dist = bidirectional.runBidirectional(
                 graph.getVertices().get(0),
-                graph.getVertices().get(graph.getVertices().size() - 1)
+                graph.getVertices().get(14)
         );
         System.out.println("\nBIDIRECTIONAL:");
 //        System.out.println("Distances: ");
@@ -48,15 +50,6 @@ public class Main {
 //        System.out.println("Prédécesseurs");
 //        System.out.println(Arrays.toString(bidirectional.getPredecessors()));
         System.out.println("Distance de S à T: " + dist);
-
-
-
-
-
-
-
-
-
 
 
 //        DigraphDijkstrazer dd = new DigraphDijkstrazer(graph);

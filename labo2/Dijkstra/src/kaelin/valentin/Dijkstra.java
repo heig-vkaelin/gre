@@ -5,6 +5,7 @@ import graph.core.impl.SimpleWeightedEdge;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.stream.Stream;
 
@@ -17,11 +18,9 @@ public class Dijkstra {
         public final Long[] distances;
         public final Integer[] predecessors;
         
-        public AlgorithmData(SimpleVertex startVertex, SimpleVertex endVertex) {
-            if (startVertex == null)
-                throw new RuntimeException("Sommet de départ invalide!");
-            if (endVertex == null)
-                throw new RuntimeException("Sommet d'arrivée invalide!");
+        public AlgorithmData(SimpleVertex from) {
+            if (from == null)
+                throw new RuntimeException("Sommet invalide!");
             
             int nbVertices = graph.getNVertices();
             queueContained = new boolean[nbVertices];
@@ -35,39 +34,35 @@ public class Dijkstra {
                     Comparator.comparingLong(v -> distances[v.id()])
             );
             verticesQueue.addAll(graph.getVertices());
-            distances[startVertex.id()] = 0L;
+            distances[from.id()] = 0L;
         }
     }
-
-//    private PriorityQueue<SimpleVertex> forwardQueue;
-//    private PriorityQueue<SimpleVertex> backwardQueue;
-//    private boolean[] forwardContained;
-//    private boolean[] backwardContained;
-//
-//    private Long[] distancesFront;
-//    private Long[] distancesBack;
     
     public Dijkstra(Digraph<SimpleVertex, SimpleWeightedEdge<SimpleVertex>> graph) {
         this.graph = graph;
     }
     
-    public AlgorithmData runForward(SimpleVertex startVertex, SimpleVertex endVertex) {
-        AlgorithmData forward = new AlgorithmData(startVertex, endVertex);
+    public AlgorithmData runForward(SimpleVertex from, SimpleVertex to) {
+        AlgorithmData forward = new AlgorithmData(from);
         
         while (!forward.verticesQueue.isEmpty()) {
             SimpleVertex nextVertex = forward.verticesQueue.remove();
+            forward.queueContained[nextVertex.id()] = false;
             
-            if (nextVertex.id() == endVertex.id() || forward.distances[nextVertex.id()] == Long.MAX_VALUE)
+            if (nextVertex.id() == to.id() || forward.distances[nextVertex.id()] == Long.MAX_VALUE)
                 break;
             
             findMin(forward, nextVertex);
+            
+            // S'il s'agissait du sommet d'arrivée, on peut sortir
+//            if ()
+//                break;
         }
         
         return forward;
     }
     
-    private void findMin(AlgorithmData data,
-                         SimpleVertex nextVertex) {
+    private void findMin(AlgorithmData data, SimpleVertex nextVertex) {
         var successors = graph.getSuccessorList(nextVertex.id());
         for (SimpleWeightedEdge<SimpleVertex> list : successors) {
             SimpleVertex succ = list.to();
@@ -77,15 +72,15 @@ public class Dijkstra {
                 data.predecessors[succ.id()] = nextVertex.id();
                 
                 // Mise à jour de la liste de priorité
-                data.verticesQueue.add(nextVertex);
-                data.verticesQueue.remove(nextVertex);
+                data.verticesQueue.remove(succ);
+                data.verticesQueue.add(succ);
             }
         }
     }
     
-    public Long runBidirectional(SimpleVertex startVertex, SimpleVertex endVertex) {
-        AlgorithmData forward = new AlgorithmData(startVertex, endVertex);
-        AlgorithmData backward = new AlgorithmData(endVertex, startVertex);
+    public Long runBidirectional(SimpleVertex from, SimpleVertex to) {
+        AlgorithmData forward = new AlgorithmData(from);
+        AlgorithmData backward = new AlgorithmData(to);
         Long mu = Long.MAX_VALUE;
         
         // TODO
@@ -151,6 +146,20 @@ public class Dijkstra {
         }
         
         return mu;
+    }
+    
+    public void printPath(AlgorithmData data, SimpleVertex from, SimpleVertex to) {
+        int fromId = from.id();
+        int toId = to.id();
+        LinkedList<Integer> path = new LinkedList<>();
+        path.add(fromId);
+        
+        while (fromId != toId) {
+            path.addLast(toId);
+            toId = data.predecessors[toId];
+        }
+        
+        System.out.println(path);
     }
 //
 //    public Long[] getDistances() {
