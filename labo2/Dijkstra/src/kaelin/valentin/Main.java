@@ -25,8 +25,8 @@ public class Main {
         ).graph();
         
         Dijkstra forward = new Dijkstra(graph);
-        SimpleVertex from = graph.getVertices().get(0);
-        SimpleVertex to = graph.getVertices().get(12);
+        SimpleVertex from = graph.getVertices().get(9);
+        SimpleVertex to = graph.getVertices().get(10);
         Dijkstra.AlgorithmData data = forward.runForward(from, to);
         
         System.out.println("FORWARD:");

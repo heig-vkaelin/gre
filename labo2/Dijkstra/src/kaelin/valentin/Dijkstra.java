@@ -17,11 +17,13 @@ public class Dijkstra {
         public final boolean[] queueContained;
         public final Long[] distances;
         public final Integer[] predecessors;
+        public int counter;
         
         public AlgorithmData(SimpleVertex from) {
             if (from == null)
                 throw new RuntimeException("Sommet invalide!");
             
+            counter = 0;
             int nbVertices = graph.getNVertices();
             queueContained = new boolean[nbVertices];
             Arrays.fill(queueContained, true);
@@ -33,9 +35,8 @@ public class Dijkstra {
                     graph.getNVertices(),
                     Comparator.comparingLong(v -> distances[v.id()])
             );
-            verticesQueue.addAll(graph.getVertices());
             distances[from.id()] = 0L;
-        }
+            verticesQueue.addAll(graph.getVertices());}
     }
     
     public Dijkstra(Digraph<SimpleVertex, SimpleWeightedEdge<SimpleVertex>> graph) {
@@ -52,6 +53,7 @@ public class Dijkstra {
             if (nextVertex.id() == to.id() || forward.distances[nextVertex.id()] == Long.MAX_VALUE)
                 break;
             
+            forward.counter++;
             findMin(forward, nextVertex);
             
             // S'il s'agissait du sommet d'arrivée, on peut sortir
@@ -154,13 +156,14 @@ public class Dijkstra {
         LinkedList<Integer> path = new LinkedList<>();
         
         while (fromId != toId) {
-            path.add(0, toId);
+            path.addFirst(toId);
             toId = data.predecessors[toId];
         }
-        path.add(0, fromId);
+        path.addFirst(fromId);
         
         System.out.println(path);
         System.out.println("Total distance: " + data.distances[to.id()]);
+        System.out.println("Nombre de sommets traités: " + data.counter);
     }
 //
 //    public Long[] getDistances() {
