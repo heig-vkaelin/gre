@@ -36,7 +36,8 @@ public class Dijkstra {
                     Comparator.comparingLong(v -> distances[v.id()])
             );
             distances[from.id()] = 0L;
-            verticesQueue.addAll(graph.getVertices());}
+            verticesQueue.addAll(graph.getVertices());
+        }
     }
     
     public Dijkstra(Digraph<SimpleVertex, SimpleWeightedEdge<SimpleVertex>> graph) {
@@ -55,10 +56,6 @@ public class Dijkstra {
             
             forward.counter++;
             findMin(forward, nextVertex);
-            
-            // S'il s'agissait du sommet d'arrivée, on peut sortir
-//            if ()
-//                break;
         }
         
         return forward;
@@ -85,7 +82,6 @@ public class Dijkstra {
         AlgorithmData backward = new AlgorithmData(to);
         Long mu = Long.MAX_VALUE;
         
-        // TODO
         while (!forward.verticesQueue.isEmpty() && !backward.verticesQueue.isEmpty()) {
             // Forward
             SimpleVertex nextVertex = forward.verticesQueue.remove();
@@ -94,58 +90,61 @@ public class Dijkstra {
             if (!backward.queueContained[nextVertex.id()])
                 break;
             
+            ++forward.counter;
             findMin(forward, nextVertex);
+            
+            // Backward
+            nextVertex = backward.verticesQueue.remove();
+            backward.queueContained[nextVertex.id()] = false;
+            
+            if (!forward.queueContained[nextVertex.id()])
+                break;
+            
+            ++backward.counter;
+            findMin(backward, nextVertex);
 
-//            var successors = graph.getSuccessorList(nextVertex.id());
-//            for (SimpleWeightedEdge<SimpleVertex> list : successors) {
-//                SimpleVertex succ = list.to();
-//                if (forwardContained[succ.id()] &&
-//                        (distancesFront[succ.id()] > distancesFront[nextVertex.id()] + list.weight())) {
-//                    distancesFront[succ.id()] = distancesFront[nextVertex.id()] + list.weight();
-//                    predecessors[succ.id()] = nextVertex.id();
-//
-//                    // Mise à jour de la liste de priorité
-//                    forward.verticesQueue.add(nextVertex);
-//                    forward.verticesQueue.remove(nextVertex);
-//
-//                    // TODO: Mise à jour de mu
-////                    if () {
-////
-////                    }
-//                    mu = Math.min(mu, distancesFront[succ.id()]);
+//            mu = Math.min(mu, distancesFront[succ.id()]);
 //                }
 //            }
 //            if (distancesBack[nextVertex.id()] != Long.MAX_VALUE) {
 //                mu = Math.min(mu, distancesFront[nextVertex.id()]);
 //            }
-            
-            
-            // Backward
-            // Backward
-            nextVertex = backward.verticesQueue.remove();
-            backward.queueContained[nextVertex.id()] = false;
-            
-            if (forward.queueContained[nextVertex.id()])
-                break;
-            
-            findMin(backward, nextVertex);
-
-//            successors = graph.getSuccessorList(nextVertex.id());
-//            for (SimpleWeightedEdge<SimpleVertex> list : successors) {
-//                SimpleVertex succ = list.to();
-//                if (backwardContained[succ.id()] &&
-//                        (distancesBack[succ.id()] > distancesBack[nextVertex.id()] + list.weight())) {
-//                    distancesBack[succ.id()] = distancesBack[nextVertex.id()] + list.weight();
-//                    predecessors[succ.id()] = nextVertex.id();
-//
-//                    // Mise à jour de la liste de priorité
-//                    backwardQueue.add(nextVertex);
-//                    backwardQueue.remove(nextVertex);
-//
-//                    mu = Math.min(mu, distancesBack[succ.id()]);
-//                }
-//            }
         }
+        
+        System.out.println("Distances: ");
+        
+        Long[] distances = new Long[forward.distances.length];
+        Integer[] predecessors = new Integer[forward.predecessors.length];
+        for (int i = 0; i < forward.distances.length; i++) {
+            if (forward.distances[i] < backward.distances[i]) {
+                distances[i] = forward.distances[i];
+                predecessors[i] = forward.predecessors[i];
+            } else {
+                distances[i] = backward.distances[i];
+                predecessors[i] = backward.predecessors[i];
+            }
+        }
+        
+        System.out.println(Arrays.toString(distances));
+        System.out.println("Prédécesseurs");
+        System.out.println(Arrays.toString(predecessors));
+    
+        // TODO: remove code en dessous et facto la method pour print
+        int fromId = from.id();
+        int toId = to.id();
+        LinkedList<Integer> path = new LinkedList<>();
+    
+        while (fromId != toId) {
+            path.addFirst(toId);
+            toId = predecessors[toId];
+        }
+        path.addFirst(fromId);
+    
+        System.out.println(path);
+        System.out.println("Total distance: " + distances[to.id()]);
+        System.out.println("Nombre de sommets traités: " + (forward.counter + backward.counter));
+        
+        // fin du code à supprimer
         
         return mu;
     }
