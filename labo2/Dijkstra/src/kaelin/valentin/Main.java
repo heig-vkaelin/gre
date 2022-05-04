@@ -25,16 +25,16 @@ public class Main {
         ).graph();
         
         Dijkstra forward = new Dijkstra(graph);
-        forward.runForward(
+        Dijkstra.AlgorithmData data = forward.runForward(
                 graph.getVertices().get(0),
                 graph.getVertices().get(graph.getVertices().size() - 1)
         );
         
         System.out.println("\nFORWARD:");
         System.out.println("Distances: ");
-        System.out.println(Arrays.toString(forward.getDistances()));
+        System.out.println(Arrays.toString(data.distances));
         System.out.println("Prédécesseurs");
-        System.out.println(Arrays.toString(forward.getPredecessors()));
+        System.out.println(Arrays.toString(data.predecessors));
         
         
         Dijkstra bidirectional = new Dijkstra(graph);
@@ -43,11 +43,21 @@ public class Main {
                 graph.getVertices().get(graph.getVertices().size() - 1)
         );
         System.out.println("\nBIDIRECTIONAL:");
-        System.out.println("Distances: ");
-        System.out.println(Arrays.toString(bidirectional.getEntireDistances()));
-        System.out.println("Prédécesseurs");
-        System.out.println(Arrays.toString(bidirectional.getPredecessors()));
+//        System.out.println("Distances: ");
+//        System.out.println(Arrays.toString(bidirectional.getEntireDistances()));
+//        System.out.println("Prédécesseurs");
+//        System.out.println(Arrays.toString(bidirectional.getPredecessors()));
         System.out.println("Distance de S à T: " + dist);
+
+
+
+
+
+
+
+
+
+
 
 //        DigraphDijkstrazer dd = new DigraphDijkstrazer(graph);
 //        dd.solve(graph.getVertices().get(0));

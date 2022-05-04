@@ -10,160 +10,159 @@ import java.util.stream.Stream;
 
 public class Dijkstra {
     private final Digraph<SimpleVertex, SimpleWeightedEdge<SimpleVertex>> graph;
-    private PriorityQueue<SimpleVertex> verticesToVisit;
-    private PriorityQueue<SimpleVertex> forwardQueue;
-    private PriorityQueue<SimpleVertex> backwardQueue;
-    private boolean[] forwardContained;
-    private boolean[] backwardContained;
     
-    private Long[] distances;
-    private Long[] distancesFront;
-    private Long[] distancesBack;
-    private Integer[] predecessors;
+    public class AlgorithmData {
+        public final PriorityQueue<SimpleVertex> verticesQueue;
+        public final boolean[] queueContained;
+        public final Long[] distances;
+        public final Integer[] predecessors;
+        
+        public AlgorithmData(SimpleVertex startVertex, SimpleVertex endVertex) {
+            if (startVertex == null)
+                throw new RuntimeException("Sommet de départ invalide!");
+            if (endVertex == null)
+                throw new RuntimeException("Sommet d'arrivée invalide!");
+            
+            int nbVertices = graph.getNVertices();
+            queueContained = new boolean[nbVertices];
+            Arrays.fill(queueContained, true);
+            distances = new Long[nbVertices];
+            Arrays.fill(distances, Long.MAX_VALUE);
+            predecessors = new Integer[nbVertices];
+            Arrays.fill(predecessors, null);
+            verticesQueue = new PriorityQueue<>(
+                    graph.getNVertices(),
+                    Comparator.comparingLong(v -> distances[v.id()])
+            );
+            verticesQueue.addAll(graph.getVertices());
+            distances[startVertex.id()] = 0L;
+        }
+    }
+
+//    private PriorityQueue<SimpleVertex> forwardQueue;
+//    private PriorityQueue<SimpleVertex> backwardQueue;
+//    private boolean[] forwardContained;
+//    private boolean[] backwardContained;
+//
+//    private Long[] distancesFront;
+//    private Long[] distancesBack;
     
     public Dijkstra(Digraph<SimpleVertex, SimpleWeightedEdge<SimpleVertex>> graph) {
         this.graph = graph;
     }
     
-    public void runForward(SimpleVertex startVertex, SimpleVertex endVertex) {
-        if (startVertex == null)
-            throw new RuntimeException("Sommet de départ invalide!");
-        if (endVertex == null)
-            throw new RuntimeException("Sommet d'arrivée invalide!");
+    public AlgorithmData runForward(SimpleVertex startVertex, SimpleVertex endVertex) {
+        AlgorithmData forward = new AlgorithmData(startVertex, endVertex);
         
-        int nbVertices = graph.getNVertices();
-        distances = new Long[nbVertices];
-        Arrays.fill(distances, Long.MAX_VALUE);
-        predecessors = new Integer[nbVertices];
-        Arrays.fill(predecessors, null);
-        verticesToVisit = new PriorityQueue<>(
-                graph.getNVertices(),
-                Comparator.comparingLong(v -> distances[v.id()])
-        );
-        verticesToVisit.addAll(graph.getVertices());
-        distances[startVertex.id()] = 0L;
-        
-        while (!verticesToVisit.isEmpty()) {
-            SimpleVertex nextVertex = verticesToVisit.remove();
+        while (!forward.verticesQueue.isEmpty()) {
+            SimpleVertex nextVertex = forward.verticesQueue.remove();
             
-            if (nextVertex.id() == endVertex.id() || distances[nextVertex.id()] == Long.MAX_VALUE)
+            if (nextVertex.id() == endVertex.id() || forward.distances[nextVertex.id()] == Long.MAX_VALUE)
                 break;
             
-            var successors = graph.getSuccessorList(nextVertex.id());
-            for (SimpleWeightedEdge<SimpleVertex> list : successors) {
-                SimpleVertex succ = list.to();
-                if (verticesToVisit.contains(succ) &&
-                        (distances[succ.id()] > distances[nextVertex.id()] + list.weight())) {
-                    distances[succ.id()] = distances[nextVertex.id()] + list.weight();
-                    predecessors[succ.id()] = nextVertex.id();
-                    
-                    // Mise à jour de la liste de priorité
-                    verticesToVisit.add(nextVertex);
-                    verticesToVisit.remove(nextVertex);
-                }
+            findMin(forward, nextVertex);
+        }
+        
+        return forward;
+    }
+    
+    private void findMin(AlgorithmData data,
+                         SimpleVertex nextVertex) {
+        var successors = graph.getSuccessorList(nextVertex.id());
+        for (SimpleWeightedEdge<SimpleVertex> list : successors) {
+            SimpleVertex succ = list.to();
+            if (data.queueContained[succ.id()] &&
+                    (data.distances[succ.id()] > data.distances[nextVertex.id()] + list.weight())) {
+                data.distances[succ.id()] = data.distances[nextVertex.id()] + list.weight();
+                data.predecessors[succ.id()] = nextVertex.id();
+                
+                // Mise à jour de la liste de priorité
+                data.verticesQueue.add(nextVertex);
+                data.verticesQueue.remove(nextVertex);
             }
         }
     }
     
     public Long runBidirectional(SimpleVertex startVertex, SimpleVertex endVertex) {
-        if (startVertex == null || endVertex == null)
-            throw new RuntimeException("Sommet de départ ou d'arrivée invalide!");
-        
-        int nbVertices = graph.getNVertices();
-        forwardContained = new boolean[nbVertices];
-        backwardContained = new boolean[nbVertices];
-        Arrays.fill(forwardContained, true);
-        Arrays.fill(backwardContained, true);
-        distancesFront = new Long[nbVertices];
-        Arrays.fill(distancesFront, Long.MAX_VALUE);
-        distancesBack = new Long[nbVertices];
-        Arrays.fill(distancesBack, Long.MAX_VALUE);
-        predecessors = new Integer[nbVertices];
-        Arrays.fill(predecessors, null);
-        distancesFront[startVertex.id()] = 0L;
-        distancesBack[endVertex.id()] = 0L;
-        forwardQueue = new PriorityQueue<>(
-                graph.getNVertices(),
-                Comparator.comparingLong(v -> distancesFront[v.id()])
-        );
-        forwardQueue.addAll(graph.getVertices());
-        backwardQueue = new PriorityQueue<>(
-                graph.getNVertices(),
-                Comparator.comparingLong(v -> distancesBack[v.id()])
-        );
-        backwardQueue.addAll(graph.getVertices());
+        AlgorithmData forward = new AlgorithmData(startVertex, endVertex);
+        AlgorithmData backward = new AlgorithmData(endVertex, startVertex);
         Long mu = Long.MAX_VALUE;
         
         // TODO
-        while (!forwardQueue.isEmpty() && !backwardQueue.isEmpty()) {
+        while (!forward.verticesQueue.isEmpty() && !backward.verticesQueue.isEmpty()) {
             // Forward
-            SimpleVertex nextVertex = forwardQueue.remove();
-            forwardContained[nextVertex.id()] = false;
+            SimpleVertex nextVertex = forward.verticesQueue.remove();
+            forward.queueContained[nextVertex.id()] = false;
             
-            if (!backwardContained[nextVertex.id()])
+            if (!backward.queueContained[nextVertex.id()])
                 break;
             
-            var successors = graph.getSuccessorList(nextVertex.id());
-            for (SimpleWeightedEdge<SimpleVertex> list : successors) {
-                SimpleVertex succ = list.to();
-                if (forwardContained[succ.id()] &&
-                        (distancesFront[succ.id()] > distancesFront[nextVertex.id()] + list.weight())) {
-                    distancesFront[succ.id()] = distancesFront[nextVertex.id()] + list.weight();
-                    predecessors[succ.id()] = nextVertex.id();
-                    
-                    // Mise à jour de la liste de priorité
-                    forwardQueue.add(nextVertex);
-                    forwardQueue.remove(nextVertex);
-                    
-                    // TODO: Mise à jour de mu
-//                    if () {
+            findMin(forward, nextVertex);
+
+//            var successors = graph.getSuccessorList(nextVertex.id());
+//            for (SimpleWeightedEdge<SimpleVertex> list : successors) {
+//                SimpleVertex succ = list.to();
+//                if (forwardContained[succ.id()] &&
+//                        (distancesFront[succ.id()] > distancesFront[nextVertex.id()] + list.weight())) {
+//                    distancesFront[succ.id()] = distancesFront[nextVertex.id()] + list.weight();
+//                    predecessors[succ.id()] = nextVertex.id();
 //
-//                    }
-                    mu = Math.min(mu, distancesFront[succ.id()]);
-                }
-            }
+//                    // Mise à jour de la liste de priorité
+//                    forward.verticesQueue.add(nextVertex);
+//                    forward.verticesQueue.remove(nextVertex);
+//
+//                    // TODO: Mise à jour de mu
+////                    if () {
+////
+////                    }
+//                    mu = Math.min(mu, distancesFront[succ.id()]);
+//                }
+//            }
 //            if (distancesBack[nextVertex.id()] != Long.MAX_VALUE) {
 //                mu = Math.min(mu, distancesFront[nextVertex.id()]);
 //            }
             
             
             // Backward
-            nextVertex = backwardQueue.remove();
-            backwardContained[nextVertex.id()] = false;
+            // Backward
+            nextVertex = backward.verticesQueue.remove();
+            backward.queueContained[nextVertex.id()] = false;
             
-            if (forwardContained[nextVertex.id()])
+            if (forward.queueContained[nextVertex.id()])
                 break;
             
-            successors = graph.getSuccessorList(nextVertex.id());
-            for (SimpleWeightedEdge<SimpleVertex> list : successors) {
-                SimpleVertex succ = list.to();
-                if (backwardContained[succ.id()] &&
-                        (distancesBack[succ.id()] > distancesBack[nextVertex.id()] + list.weight())) {
-                    distancesBack[succ.id()] = distancesBack[nextVertex.id()] + list.weight();
-                    predecessors[succ.id()] = nextVertex.id();
-                    
-                    // Mise à jour de la liste de priorité
-                    backwardQueue.add(nextVertex);
-                    backwardQueue.remove(nextVertex);
-                    
-                    mu = Math.min(mu, distancesBack[succ.id()]);
-                }
-            }
+            findMin(backward, nextVertex);
+
+//            successors = graph.getSuccessorList(nextVertex.id());
+//            for (SimpleWeightedEdge<SimpleVertex> list : successors) {
+//                SimpleVertex succ = list.to();
+//                if (backwardContained[succ.id()] &&
+//                        (distancesBack[succ.id()] > distancesBack[nextVertex.id()] + list.weight())) {
+//                    distancesBack[succ.id()] = distancesBack[nextVertex.id()] + list.weight();
+//                    predecessors[succ.id()] = nextVertex.id();
+//
+//                    // Mise à jour de la liste de priorité
+//                    backwardQueue.add(nextVertex);
+//                    backwardQueue.remove(nextVertex);
+//
+//                    mu = Math.min(mu, distancesBack[succ.id()]);
+//                }
+//            }
         }
         
         return mu;
     }
-    
-    public Long[] getDistances() {
-        return distances;
-    }
-    
-    public Long[] getEntireDistances() {
-        return Stream.concat(Arrays.stream(distancesFront), Arrays.stream(distancesBack))
-                .toArray(Long[]::new);
-    }
-    
-    public Integer[] getPredecessors() {
-        return predecessors;
-    }
+//
+//    public Long[] getDistances() {
+//        return distances;
+//    }
+
+//    public Long[] getEntireDistances() {
+//        return Stream.concat(Arrays.stream(distancesFront), Arrays.stream(distancesBack))
+//                .toArray(Long[]::new);
+//    }
+
+//    public Integer[] getPredecessors() {
+//        return predecessors;
+//    }
 }
