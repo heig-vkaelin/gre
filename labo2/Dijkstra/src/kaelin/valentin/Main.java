@@ -26,7 +26,7 @@ public class Main {
         
         Dijkstra forward = new Dijkstra(graph);
         SimpleVertex from = graph.getVertices().get(9);
-        SimpleVertex to = graph.getVertices().get(10);
+        SimpleVertex to = graph.getVertices().get(5);
         Dijkstra.AlgorithmData data = forward.runForward(from, to);
         
         System.out.println("FORWARD:");
@@ -42,7 +42,7 @@ public class Main {
         Dijkstra bidirectional = new Dijkstra(graph);
         Long dist = bidirectional.runBidirectional(
                 graph.getVertices().get(9),
-                graph.getVertices().get(10)
+                graph.getVertices().get(5)
         );
 //        System.out.println("Distances: ");
 //        System.out.println(Arrays.toString(bidirectional.getEntireDistances()));
