@@ -75,6 +75,8 @@ public class Dijkstra {
      */
     public Results runForward(SimpleVertex from, SimpleVertex to) {
         AlgorithmData forward = new AlgorithmData(from);
+        if (to == null)
+            throw new RuntimeException("Sommet d'arrivée invalide!");
         
         while (!forward.verticesQueue.isEmpty()) {
             SimpleVertex nextVertex = forward.verticesQueue.remove();
