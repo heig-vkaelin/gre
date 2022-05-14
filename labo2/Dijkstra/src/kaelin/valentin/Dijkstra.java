@@ -3,37 +3,46 @@ package kaelin.valentin;
 import graph.core.impl.Digraph;
 import graph.core.impl.SimpleWeightedEdge;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
-import java.util.stream.Stream;
 
+/**
+ * Classe permettant d'appliquer l'algorithme de Dijkstra (bidirectionnel ou non)
+ * au graphe souhaité.
+ *
+ * @author Valentin Kaelin
+ */
 public class Dijkstra {
     private final Digraph<SimpleVertex, SimpleWeightedEdge<SimpleVertex>> graph;
     
-    public Long mu;
-    public SimpleWeightedEdge<SimpleVertex> muEdge;
+    private Long mu;
+    private SimpleWeightedEdge<SimpleVertex> muEdge;
     
-    public class AlgorithmData {
-        public final PriorityQueue<SimpleVertex> verticesQueue;
-        public final boolean[] queueContained;
-        public final Long[] distances;
-        public final Integer[] predecessors;
-        public int counter;
+    private class AlgorithmData {
+        private final PriorityQueue<SimpleVertex> verticesQueue;
+        private final boolean[] queueContained;
+        private final Long[] distances;
+        private final Integer[] predecessors;
+        private int counter;
         
         public AlgorithmData(SimpleVertex from) {
             if (from == null)
                 throw new RuntimeException("Sommet invalide!");
             
             counter = 0;
+            
             int nbVertices = graph.getNVertices();
             queueContained = new boolean[nbVertices];
-            Arrays.fill(queueContained, true);
             distances = new Long[nbVertices];
-            Arrays.fill(distances, Long.MAX_VALUE);
             predecessors = new Integer[nbVertices];
-            Arrays.fill(predecessors, null);
+            
+            for (int i = 0; i < nbVertices; i++) {
+                queueContained[i] = true;
+                distances[i] = Long.MAX_VALUE;
+                predecessors[i] = null;
+            }
+            
             verticesQueue = new PriorityQueue<>(
                     graph.getNVertices(),
                     Comparator.comparingLong(v -> distances[v.id()])
@@ -46,11 +55,25 @@ public class Dijkstra {
         }
     }
     
+    /**
+     * Crée l'instance de la classe en stockant le graphe souhaité pour pouvoir
+     * par la suite appliquer l'algorithme
+     *
+     * @param graph : graphe souhaité
+     */
     public Dijkstra(Digraph<SimpleVertex, SimpleWeightedEdge<SimpleVertex>> graph) {
         this.graph = graph;
     }
     
-    public AlgorithmData runForward(SimpleVertex from, SimpleVertex to) {
+    /**
+     * Exécute l'algorithme de Dijkstra classique
+     *
+     * @param from : sommet de départ
+     * @param to   : sommet d'arrivée
+     * @return les résultats de l'algorithme (chemin le plus court et nombre de
+     * sommets traités)
+     */
+    public Results runForward(SimpleVertex from, SimpleVertex to) {
         AlgorithmData forward = new AlgorithmData(from);
         
         while (!forward.verticesQueue.isEmpty()) {
@@ -64,52 +87,20 @@ public class Dijkstra {
             findMin(forward, nextVertex);
         }
         
-        return forward;
+        return new Results(getPath(forward, from.id(), to.id()), forward.counter);
     }
     
-    private void findMin(AlgorithmData forward, SimpleVertex nextVertex) {
-        findMin(forward, nextVertex, null);
-    }
-    
-    private void findMin(AlgorithmData current, SimpleVertex nextVertex,
-                         AlgorithmData otherDirection) {
-        var successors = graph.getSuccessorList(nextVertex.id());
-        for (SimpleWeightedEdge<SimpleVertex> edge : successors) {
-            SimpleVertex succ = edge.to();
-            if (current.queueContained[succ.id()] &&
-                    (current.distances[succ.id()] > current.distances[nextVertex.id()] + edge.weight())) {
-                current.distances[succ.id()] =
-                        current.distances[nextVertex.id()] + edge.weight();
-                current.predecessors[succ.id()] = nextVertex.id();
-                
-                // Mise à jour de la liste de priorité
-                current.verticesQueue.remove(succ);
-                current.verticesQueue.add(succ);
-                
-                // Mise à jour de mu
-                if (otherDirection != null) {
-                    if (!otherDirection.queueContained[succ.id()]
-                            && mu >
-                            current.distances[nextVertex.id()] + otherDirection.distances[succ.id()] + edge.weight()) {
-                        System.out.println("before Mu: " + mu);
-                        
-                        mu = current.distances[nextVertex.id()]
-                                + otherDirection.distances[succ.id()] + edge.weight();
-                        muEdge = edge;
-                        
-                        System.out.println("Mu: " + mu);
-                        System.out.println("MuEdge: " + muEdge.from().id() + " -> " + muEdge.to().id());
-                    }
-                }
-            }
-        }
-    }
-    
-    public Long runBidirectional(SimpleVertex from, SimpleVertex to) {
+    /**
+     * Exécute l'algorithme de Dijkstra bidirectionnel
+     *
+     * @param from : sommet de départ
+     * @param to   : sommet d'arrivée
+     * @return les résultats de l'algorithme (chemin le plus court et nombre de
+     * sommets traités)
+     */
+    public Results runBidirectional(SimpleVertex from, SimpleVertex to) {
         AlgorithmData forward = new AlgorithmData(from);
         AlgorithmData backward = new AlgorithmData(to);
-//        Long mu = Long.MAX_VALUE;
-//        SimpleWeightedEdge<SimpleVertex> muEdge = null;
         
         while (!forward.verticesQueue.isEmpty() && !backward.verticesQueue.isEmpty()) {
             // Forward
@@ -131,67 +122,83 @@ public class Dijkstra {
             
             ++backward.counter;
             findMin(backward, nextVertex, forward);
-
-//            mu = Math.min(mu, distancesFront[succ.id()]);
-//                }
-//            }
-//            if (distancesBack[nextVertex.id()] != Long.MAX_VALUE) {
-//                mu = Math.min(mu, distancesFront[nextVertex.id()]);
-//            }
         }
-        
-        System.out.println("Mu final: " + mu);
-        System.out.println("MuEdge final: " + muEdge.from().id() + " -> " + muEdge.to().id());
-        
-        System.out.println("Distances: ");
 
-//        Long[] distances = new Long[forward.distances.length];
-//        Integer[] predecessors = new Integer[forward.predecessors.length];
-//        for (int i = 0; i < forward.distances.length; i++) {
-//            if (forward.distances[i] < backward.distances[i]) {
-//                distances[i] = forward.distances[i];
-//                predecessors[i] = forward.predecessors[i];
-//            } else {
-//                distances[i] = backward.distances[i];
-//                predecessors[i] = backward.predecessors[i];
-//            }
-//        }
+//        System.out.println("Mu final: " + mu);
+//        System.out.println("MuEdge final: " + muEdge.from().id() + " -> " + muEdge.to().id());
         
-        System.out.println(Arrays.toString(forward.distances));
-        System.out.println(Arrays.toString(backward.distances));
-        System.out.println("Prédécesseurs");
-        System.out.println(Arrays.toString(forward.predecessors));
-        System.out.println(Arrays.toString(backward.predecessors));
-        
-        // TODO: remove code en dessous et facto la method pour print
-//        int fromId = from.id();
-//        int toId = to.id();
-//        LinkedList<Integer> path = new LinkedList<>();
-//
-//        while (fromId != toId) {
-//            path.addFirst(toId);
-//            toId = predecessors[toId];
-//        }
-//        path.addFirst(fromId);
-//
-//        System.out.println(path);
-//        System.out.println("Total distance: " + distances[to.id()]);
-        System.out.println("Nombre de sommets traités: " + (forward.counter + backward.counter));
-        printPath2(forward, backward, from, to, muEdge);
-        
-        // fin du code à supprimer
-        
-        return Long.MAX_VALUE;
+        return new Results(
+                getBiDirectionalPath(forward, backward, from.id(), to.id(), muEdge),
+                forward.counter + backward.counter
+        );
     }
     
-    public void printPath2(AlgorithmData forward, AlgorithmData backward,
-                           SimpleVertex from, SimpleVertex to,
-                           SimpleWeightedEdge<SimpleVertex> muEdge) {
-        int sourceId = from.id();
-        int destId = to.id();
+    /**
+     * Traite un sommet lors de l'algorithme de Dijkstra dans sa version
+     * classique
+     *
+     * @param forward    : données de l'exploration en avant
+     * @param nextVertex : sommet à traiter
+     */
+    private void findMin(AlgorithmData forward, SimpleVertex nextVertex) {
+        findMin(forward, nextVertex, null);
+    }
+    
+    /**
+     * Traite un sommet lors de l'algorithme de Dijkstra dans sa version
+     * bidirectionnelle
+     *
+     * @param current        : données de l'exploration dans le sens actuel
+     * @param nextVertex     : sommet à traiter
+     * @param otherDirection : données de l'exploration dans l'autre sens
+     */
+    private void findMin(AlgorithmData current, SimpleVertex nextVertex,
+                         AlgorithmData otherDirection) {
+        var successors = graph.getSuccessorList(nextVertex.id());
+        for (SimpleWeightedEdge<SimpleVertex> edge : successors) {
+            SimpleVertex succ = edge.to();
+            if (current.queueContained[succ.id()] &&
+                    (current.distances[succ.id()] > current.distances[nextVertex.id()] + edge.weight())) {
+                current.distances[succ.id()] =
+                        current.distances[nextVertex.id()] + edge.weight();
+                current.predecessors[succ.id()] = nextVertex.id();
+                
+                // Mise à jour de la liste de priorité
+                current.verticesQueue.remove(succ);
+                current.verticesQueue.add(succ);
+                
+                // Mise à jour de mu si bidirectionnel
+                if (otherDirection != null && !otherDirection.queueContained[succ.id()]
+                        && mu >
+                        current.distances[nextVertex.id()] + otherDirection.distances[succ.id()] + edge.weight()) {
+                    mu = current.distances[nextVertex.id()] + otherDirection.distances[succ.id()] + edge.weight();
+                    muEdge = edge;
+//                    System.out.println("Mu: " + mu);
+//                    System.out.println("MuEdge: " + muEdge.from().id() + " -> " + muEdge.to().id());
+                }
+            }
+        }
+    }
+    
+    /**
+     * Retourne le plus court chemin entre 2 sommets sous la forme d'une liste
+     * après avoir effectué un Dijkstra bidirectionnel
+     *
+     * @param forward  : données de l'exploration en avant
+     * @param backward : données de l'exploration en arrière
+     * @param sourceId : id du sommet de départ
+     * @param destId   : id du sommet d'arrivée
+     * @param muEdge   : dernier arc stocké lors de la modification de mu
+     * @return le plus court chemin
+     */
+    private LinkedList<Integer> getBiDirectionalPath(AlgorithmData forward,
+                                                     AlgorithmData backward,
+                                                     int sourceId, int destId,
+                                                     SimpleWeightedEdge<SimpleVertex> muEdge) {
         int fromId = muEdge.from().id();
         int toId = muEdge.to().id();
         LinkedList<Integer> path = new LinkedList<>();
+        
         while (fromId != sourceId && fromId != destId) {
             path.addFirst(fromId);
             fromId = forward.predecessors[fromId];
@@ -204,35 +211,27 @@ public class Dijkstra {
         }
         path.addLast(destId);
         
-        System.out.println("Chemin: " + path);
+        return path;
     }
     
-    public void printPath(AlgorithmData data, SimpleVertex from, SimpleVertex to) {
-        int fromId = from.id();
-        int toId = to.id();
+    /**
+     * Retourne le plus court chemin entre 2 sommets sous la forme d'une liste
+     * après avoir effectué un Dijkstra classique
+     *
+     * @param data : données de l'exploration en avant
+     * @param from : id du sommet de départ
+     * @param to   : id du sommet d'arrivée
+     * @return le plus court chemin
+     */
+    private LinkedList<Integer> getPath(AlgorithmData data, int from, int to) {
         LinkedList<Integer> path = new LinkedList<>();
         
-        while (fromId != toId) {
-            path.addFirst(toId);
-            toId = data.predecessors[toId];
+        while (from != to) {
+            path.addFirst(to);
+            to = data.predecessors[to];
         }
-        path.addFirst(fromId);
+        path.addFirst(from);
         
-        System.out.println(path);
-        System.out.println("Total distance: " + data.distances[to.id()]);
-        System.out.println("Nombre de sommets traités: " + data.counter);
+        return path;
     }
-//
-//    public Long[] getDistances() {
-//        return distances;
-//    }
-
-//    public Long[] getEntireDistances() {
-//        return Stream.concat(Arrays.stream(distancesFront), Arrays.stream(distancesBack))
-//                .toArray(Long[]::new);
-//    }
-
-//    public Integer[] getPredecessors() {
-//        return predecessors;
-//    }
 }
