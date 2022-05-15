@@ -112,8 +112,8 @@ public class Main {
                 DATA_FOLDER + MEDIUM_GRAPH
         ).graph();
         
-        SimpleVertex from = graph.getVertices().get(3363);
-        SimpleVertex to = graph.getVertices().get(7911);
+        SimpleVertex from = graph.getVertices().get(4143);
+        SimpleVertex to = graph.getVertices().get(2386);
         
         System.out.println("FORWARD:");
         Dijkstra forward = new Dijkstra(graph);
