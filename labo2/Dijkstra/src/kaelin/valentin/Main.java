@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 public class Main {
     private static final int SEED = 20220404;
     private static final Random RANDOM = new Random(SEED);
+    
     private static final String DATA_FOLDER = "data/";
     private static final String SMALL_GRAPH = "R15_1.txt";
     private static final String MEDIUM_GRAPH = "R10000_1.txt";
@@ -37,23 +38,6 @@ public class Main {
         ).graph();
         
         testAlgorithms(graph);
-
-//        SimpleVertex from = graph.getVertices().get(5);
-//        SimpleVertex to = graph.getVertices().get(9);
-//
-//        System.out.println("FORWARD:");
-//        Dijkstra forward = new Dijkstra(graph);
-//        Results results = forward.runForward(from, to);
-//
-//        System.out.println("Path: " + results.getShortestPath());
-//        System.out.println("Nb sommets traités: " + results.getNbVerticesProcessed());
-//
-//        System.out.println("\nBIDIRECTIONAL:");
-//        Dijkstra bidirectional = new Dijkstra(graph);
-//        Results resultsBi = bidirectional.runBidirectional(from, to);
-//
-//        System.out.println("Path: " + resultsBi.getShortestPath());
-//        System.out.println("Nb sommets traités: " + resultsBi.getNbVerticesProcessed());
     }
     
     /**
@@ -89,6 +73,11 @@ public class Main {
             nbVerticesClassic.add(classic.getNbVerticesProcessed());
             Results bidirectional = dijkstra.runBidirectional(from, to);
             nbVerticesBidirectional.add(bidirectional.getNbVerticesProcessed());
+            
+            // Petit test afin de vérifier que nos algos sont cohérents
+            if (classic.getShortestPathWeight() != bidirectional.getShortestPathWeight()) {
+                throw new RuntimeException("ERROR IN TESTS");
+            }
         }
         
         // Sauvegarde les résultats dans un fichier
@@ -102,5 +91,37 @@ public class Main {
             );
         }
         out.close();
+    }
+    
+    /**
+     * Fonction pour tester rapidement un cas "en dur"
+     *
+     * @throws IOException si le fichier du graphe n'existe pas
+     */
+    private static void testOneCase() throws IOException {
+        var graph = new CartesianGraphReader<>(
+                new SimpleVertexFactory(),
+                new SimpleWeightedEdgeFactory<>(new SimpleEdgeWeighter()),
+                DATA_FOLDER + MEDIUM_GRAPH
+        ).graph();
+        
+        SimpleVertex from = graph.getVertices().get(3363);
+        SimpleVertex to = graph.getVertices().get(7911);
+        
+        System.out.println("FORWARD:");
+        Dijkstra forward = new Dijkstra(graph);
+        Results results = forward.runForward(from, to);
+        
+        System.out.println("Chemin: " + results.getShortestPath());
+        System.out.println("Nb sommets traités: " + results.getNbVerticesProcessed());
+        System.out.println("Poids chemin: " + results.getShortestPathWeight());
+        
+        System.out.println("\nBIDIRECTIONAL:");
+        Dijkstra bidirectional = new Dijkstra(graph);
+        Results resultsBi = bidirectional.runBidirectional(from, to);
+        
+        System.out.println("Chemin: " + resultsBi.getShortestPath());
+        System.out.println("Nb sommets traités: " + resultsBi.getNbVerticesProcessed());
+        System.out.println("Poids chemin: " + resultsBi.getShortestPathWeight());
     }
 }

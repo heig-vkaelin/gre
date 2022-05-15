@@ -89,7 +89,11 @@ public class Dijkstra {
             findMin(forward, nextVertex);
         }
         
-        return new Results(getPath(forward, from.id(), to.id()), forward.counter);
+        return new Results(
+                getPath(forward, from.id(), to.id()),
+                forward.counter,
+                forward.distances[to.id()]
+        );
     }
     
     /**
@@ -125,13 +129,11 @@ public class Dijkstra {
             ++backward.counter;
             findMin(backward, nextVertex, forward);
         }
-
-//        System.out.println("Mu final: " + mu);
-//        System.out.println("MuEdge final: " + muEdge.from().id() + " -> " + muEdge.to().id());
         
         return new Results(
                 getBiDirectionalPath(forward, backward, from.id(), to.id(), muEdge),
-                forward.counter + backward.counter
+                forward.counter + backward.counter,
+                mu
         );
     }
     
@@ -175,8 +177,6 @@ public class Dijkstra {
                         current.distances[nextVertex.id()] + otherDirection.distances[succ.id()] + edge.weight()) {
                     mu = current.distances[nextVertex.id()] + otherDirection.distances[succ.id()] + edge.weight();
                     muEdge = edge;
-//                    System.out.println("Mu: " + mu);
-//                    System.out.println("MuEdge: " + muEdge.from().id() + " -> " + muEdge.to().id());
                 }
             }
         }

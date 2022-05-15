@@ -10,16 +10,18 @@ import java.util.LinkedList;
 public class Results {
     private final LinkedList<Integer> path;
     private final int counter;
+    private final long weight;
     
     /**
-     * Crée de nouveau résultats
+     * Crée de nouveaux résultats
      *
      * @param path    : plus court chemin
      * @param counter : nombre de sommets traités
      */
-    public Results(LinkedList<Integer> path, int counter) {
+    public Results(LinkedList<Integer> path, int counter, long weight) {
         this.path = path;
         this.counter = counter;
+        this.weight = weight;
     }
     
     /**
@@ -34,5 +36,12 @@ public class Results {
      */
     public LinkedList<Integer> getShortestPath() {
         return path;
+    }
+    
+    /**
+     * @return le poids du plus court chemin
+     */
+    public long getShortestPathWeight() {
+        return weight;
     }
 }
