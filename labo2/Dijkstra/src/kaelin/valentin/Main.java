@@ -91,6 +91,13 @@ public class Main {
             );
         }
         out.close();
+        
+        PrintStream out2 = new PrintStream(new FileOutputStream("classic.txt"));
+        out2.println(nbVerticesClassic);
+        out2.close();
+        PrintStream out3 = new PrintStream(new FileOutputStream("bidirectional.txt"));
+        out3.println(nbVerticesBidirectional);
+        out3.close();
     }
     
     /**
