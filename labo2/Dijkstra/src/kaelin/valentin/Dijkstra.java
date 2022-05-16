@@ -19,6 +19,10 @@ public class Dijkstra {
     private Long mu;
     private SimpleWeightedEdge<SimpleVertex> muEdge;
     
+    /**
+     * Classe interne permettant de stocker les informations nécessaires à une
+     * exploration
+     */
     private class AlgorithmData {
         private final PriorityQueue<SimpleVertex> verticesQueue;
         private final boolean[] queueContained;
@@ -47,6 +51,7 @@ public class Dijkstra {
                     graph.getNVertices(),
                     Comparator.comparingLong(v -> distances[v.id()])
             );
+            
             distances[from.id()] = 0L;
             verticesQueue.addAll(graph.getVertices());
             
@@ -62,6 +67,9 @@ public class Dijkstra {
      * @param graph : graphe souhaité
      */
     public Dijkstra(Digraph<SimpleVertex, SimpleWeightedEdge<SimpleVertex>> graph) {
+        if (graph == null)
+            throw new RuntimeException("Graphe invalide!");
+        
         this.graph = graph;
     }
     
@@ -161,10 +169,9 @@ public class Dijkstra {
         var successors = graph.getSuccessorList(nextVertex.id());
         for (SimpleWeightedEdge<SimpleVertex> edge : successors) {
             SimpleVertex succ = edge.to();
-            if (current.queueContained[succ.id()] &&
-                    (current.distances[succ.id()] > current.distances[nextVertex.id()] + edge.weight())) {
-                current.distances[succ.id()] =
-                        current.distances[nextVertex.id()] + edge.weight();
+            if (current.queueContained[succ.id()]
+                    && current.distances[succ.id()] > current.distances[nextVertex.id()] + edge.weight()) {
+                current.distances[succ.id()] = current.distances[nextVertex.id()] + edge.weight();
                 current.predecessors[succ.id()] = nextVertex.id();
                 
                 // Mise à jour de la liste de priorité
@@ -172,9 +179,9 @@ public class Dijkstra {
                 current.verticesQueue.add(succ);
                 
                 // Mise à jour de mu si bidirectionnel
-                if (otherDirection != null && !otherDirection.queueContained[succ.id()]
-                        && mu >
-                        current.distances[nextVertex.id()] + otherDirection.distances[succ.id()] + edge.weight()) {
+                if (otherDirection != null
+                        && !otherDirection.queueContained[succ.id()]
+                        && mu > current.distances[nextVertex.id()] + otherDirection.distances[succ.id()] + edge.weight()) {
                     mu = current.distances[nextVertex.id()] + otherDirection.distances[succ.id()] + edge.weight();
                     muEdge = edge;
                 }
@@ -199,6 +206,11 @@ public class Dijkstra {
                                                      SimpleWeightedEdge<SimpleVertex> muEdge) {
         int fromId = muEdge.from().id();
         int toId = muEdge.to().id();
+        // Arrêté sur une itération en arrière: on inverse l'arc du mu
+        if (forward.counter == backward.counter) {
+            fromId = muEdge.to().id();
+            toId = muEdge.from().id();
+        }
         LinkedList<Integer> path = new LinkedList<>();
         
         while (fromId != sourceId && fromId != destId) {

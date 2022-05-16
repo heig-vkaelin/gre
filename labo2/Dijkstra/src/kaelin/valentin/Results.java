@@ -9,26 +9,26 @@ import java.util.LinkedList;
  */
 public class Results {
     private final LinkedList<Integer> path;
-    private final int counter;
-    private final long weight;
+    private final int verticesCounter;
+    private final long pathWeight;
     
     /**
      * Crée de nouveaux résultats
      *
-     * @param path    : plus court chemin
-     * @param counter : nombre de sommets traités
+     * @param path            : plus court chemin
+     * @param verticesCounter : nombre de sommets traités
      */
-    public Results(LinkedList<Integer> path, int counter, long weight) {
+    public Results(LinkedList<Integer> path, int verticesCounter, long pathWeight) {
         this.path = path;
-        this.counter = counter;
-        this.weight = weight;
+        this.verticesCounter = verticesCounter;
+        this.pathWeight = pathWeight;
     }
     
     /**
      * @return le nombre de sommets traités
      */
     public int getNbVerticesProcessed() {
-        return counter;
+        return verticesCounter;
     }
     
     /**
@@ -42,6 +42,6 @@ public class Results {
      * @return le poids du plus court chemin
      */
     public long getShortestPathWeight() {
-        return weight;
+        return pathWeight;
     }
 }
